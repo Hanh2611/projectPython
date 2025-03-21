@@ -4,135 +4,118 @@ import numpy as np
 import cv2
 import face_recognition
 import cvzone
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import db
-from firebase_admin import storage
-import numpy as np
 from datetime import datetime
+from database import get_student_info, update_attendance, get_student_image
 
-cred = credentials.Certificate("serviceAccountKey.json")
-firebase_admin.initialize_app(cred, {
-    'databaseURL': "https://faceattendacerealtime-ad7d1-default-rtdb.firebaseio.com/",
-    # 'storageBucket': ""
-})
-
-# bucket = storage.bucket()
-
+# Thiết lập camera
 cap = cv2.VideoCapture(0)
 cap.set(3, 640)
 cap.set(4, 480)
 
+# Tải ảnh nền và các mode giao diện
 imgBackground = cv2.imread('Resources/background.png')
-
-# Importing the mode images into a list
 folderModePath = 'Resources/Modes'
 modePathList = os.listdir(folderModePath)
-imgModeList = []
-for path in modePathList:
-    imgModeList.append(cv2.imread(os.path.join(folderModePath, path)))
-# print(len(imgModeList))
+imgModeList = [cv2.imread(os.path.join(folderModePath, path)) for path in modePathList]
 
-# Load the encoding file
-print("Loading Encode File ...")
-file = open('EncodeFile.p', 'rb')
-encodeListKnownWithIds = pickle.load(file)
-file.close()
-encodeListKnown, studentIds = encodeListKnownWithIds
-# print(studentIds)
-print("Encode File Loaded")
+# Tải file mã hoá khuôn mặt từ thư mục Encodings
+print("Đang tải file mã hoá khuôn mặt ...")
+with open('Encodings/EncodeFile.p', 'rb') as file:
+    encodeListKnown, studentIds = pickle.load(file)
+print("File mã hoá đã được tải.")
 
 modeType = 0
-counter = 0
-id = -1
-# imgStudent = []
-
-current_id = None  # ID của người đang hiển thị
-display_info = False  # Cờ báo hiệu hiển thị thông tin
+current_id = None  # ID người được nhận diện
+display_info = False
+studentInfo = None  # Thông tin sinh viên lấy từ MySQL
 
 while True:
     success, img = cap.read()
     if not success or img is None:
-        print("Không thể lấy khung hình từ camera")
+        print("Không lấy được khung hình từ camera.")
         continue
 
-    # Tiền xử lý ảnh
-    imgS = cv2.resize(img, (0, 0), None, 0.25, 0.25)
+    # Tiền xử lý ảnh: resize để tăng tốc xử lý
+    imgS = cv2.resize(img, (0, 0), fx=0.25, fy=0.25)
     imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
 
-    faceCurFrame = face_recognition.face_locations(imgS)
-    encodeCurFrame = face_recognition.face_encodings(imgS, faceCurFrame)
+    # Phát hiện khuôn mặt và mã hoá
+    faceLocations = face_recognition.face_locations(imgS)
+    encodeCurrentFrame = face_recognition.face_encodings(imgS, faceLocations)
 
     # Cập nhật background
     imgBackgroundCopy = imgBackground.copy()
-    imgBackgroundCopy[162:162 + 480, 55:55 + 640] = img
+    imgBackgroundCopy[162:162+480, 55:55+640] = img
 
-    # Nếu có khuôn mặt
-    if faceCurFrame:
-        # Ở đây ta chỉ xét khuôn mặt đầu tiên (hoặc có thể lặp qua tất cả nếu muốn)
-        encodeFace = encodeCurFrame[0]
-        faceLoc = faceCurFrame[0]
+    if faceLocations:
+        encodeFace = encodeCurrentFrame[0]
+        faceLoc = faceLocations[0]
 
         matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
-        faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
-        matchIndex = np.argmin(faceDis)
+        faceDistances = face_recognition.face_distance(encodeListKnown, encodeFace)
+        matchIndex = np.argmin(faceDistances)
 
         if matches[matchIndex]:
             detected_id = studentIds[matchIndex]
-            # Nếu người nhận diện khác với người hiện đang hiển thị hoặc chưa có người nào được hiển thị
-            if current_id is None or detected_id != current_id:
+
+
+            # Nếu phát hiện được khuôn mặt mới
+            if current_id != detected_id:
                 current_id = detected_id
                 display_info = True
-                # Lấy dữ liệu từ Firebase cho người mới
-                peopleInfo = db.reference(f'People/{current_id}').get()
-                # Cập nhật thông tin điểm danh (nếu cần thiết, ví dụ kiểm tra thời gian)
-                datetimeObject = datetime.strptime(peopleInfo['last_attendance_time'], "%Y-%m-%d %H:%M:%S")
-                secondsElapsed = (datetime.now() - datetimeObject).total_seconds()
-                if secondsElapsed > 30:
-                    ref = db.reference(f'People/{current_id}')
-                    peopleInfo['total_attendance'] += 1
-                    ref.child('total_attendance').set(peopleInfo['total_attendance'])
-                    ref.child('last_attendance_time').set(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-            # Vẽ khung khuôn mặt
-            y1, x2, y2, x1 = faceLoc
-            y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
-            bbox = 55 + x1, 162 + y1, x2 - x1, y2 - y1
-            imgBackgroundCopy = cvzone.cornerRect(imgBackgroundCopy, bbox, rt=0)
+                # Lấy thông tin sinh viên từ MySQL
+                studentInfo = get_student_info(current_id)
 
+                if studentInfo:
+                    update_attendance(current_id)
+                else:
+                    print(f"Không tìm thấy thông tin cho ID {current_id}")
+            # Vẽ khung quanh khuôn mặt
+            y1, x2, y2, x1 = [v*4 for v in faceLoc]
+            bbox = (55 + x1, 162 + y1, x2 - x1, y2 - y1)
+            imgBackgroundCopy = cvzone.cornerRect(imgBackgroundCopy, bbox, rt=0)
         else:
-            # Nếu khuôn mặt không khớp, reset hiển thị
             current_id = None
             display_info = False
     else:
-        # Nếu không có khuôn mặt nào, reset
         current_id = None
         display_info = False
 
-    # Hiển thị mode và thông tin người được nhận diện
-    if display_info and current_id is not None:
-        # Ví dụ: chọn mode hiển thị thông tin (ví dụ: modeType = 1)
+    # Hiển thị thông tin sinh viên nếu có
+    if display_info and current_id is not None and studentInfo:
         modeType = 1
         imgBackgroundCopy[44:44 + 633, 808:808 + 414] = imgModeList[modeType]
-        # Hiển thị thông tin (các thông tin có thể tùy chỉnh vị trí và kiểu chữ)
-        cv2.putText(imgBackgroundCopy, str(peopleInfo['total_attendance']), (861, 125),
-                    cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 1)
-        cv2.putText(imgBackgroundCopy, str(peopleInfo['major']), (1006, 550),
-                    cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 1)
-        cv2.putText(imgBackgroundCopy, str(current_id), (1006, 493),
-                    cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 1)
-        cv2.putText(imgBackgroundCopy, str(peopleInfo['standing']), (910, 625),
-                    cv2.FONT_HERSHEY_COMPLEX, 0.6, (100, 100, 100), 1)
-        cv2.putText(imgBackgroundCopy, str(peopleInfo['year']), (1025, 625),
-                    cv2.FONT_HERSHEY_COMPLEX, 0.6, (100, 100, 100), 1)
-        cv2.putText(imgBackgroundCopy, str(peopleInfo['starting_year']), (1125, 625),
-                    cv2.FONT_HERSHEY_COMPLEX, 0.6, (100, 100, 100), 1)
 
-        (w, h), _ = cv2.getTextSize(peopleInfo['name'], cv2.FONT_HERSHEY_COMPLEX, 1, 1)
+        # Hiển thị thông tin sinh viên
+        cv2.putText(imgBackgroundCopy, str(studentInfo['total_attendance']), (861, 125),
+                    cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
+        cv2.putText(imgBackgroundCopy, str(studentInfo['major']), (1006, 550),
+                    cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 2)
+        cv2.putText(imgBackgroundCopy, str(current_id), (1006, 493),
+                    cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 2)
+        cv2.putText(imgBackgroundCopy, str(studentInfo['standing']), (905, 625),
+                    cv2.FONT_HERSHEY_COMPLEX, 0.4, (100, 100, 100), 1)
+        cv2.putText(imgBackgroundCopy, str(studentInfo['year']), (1020, 625),
+                    cv2.FONT_HERSHEY_COMPLEX, 0.5, (100, 100, 100), 1)
+        cv2.putText(imgBackgroundCopy, str(studentInfo['starting_year']), (1120, 625),
+                    cv2.FONT_HERSHEY_COMPLEX, 0.5, (100, 100, 100), 1)
+
+        # Canh giữa tên sinh viên
+        (w, _), _ = cv2.getTextSize(studentInfo['name'], cv2.FONT_HERSHEY_COMPLEX, 1, 1)
         offset = (414 - w) // 2
-        cv2.putText(imgBackgroundCopy, str(peopleInfo['name']), (808 + offset, 445),
+        cv2.putText(imgBackgroundCopy, studentInfo['name'], (808 + offset, 445),
                     cv2.FONT_HERSHEY_COMPLEX, 1, (50, 50, 50), 1)
+
+        # 🎯 Hiển thị ảnh sinh viên từ MySQL nếu có
+        student_img = get_student_image(current_id)  # Lấy ảnh từ database
+        if student_img is not None:
+            student_img_resized = cv2.resize(student_img, (216, 216))  # Resize ảnh về đúng kích thước
+            imgBackgroundCopy[175:175 + 216, 909:909 + 216] = student_img_resized
+        else:
+            # Nếu không có ảnh, hiển thị placeholder hoặc thông báo
+            cv2.putText(imgBackgroundCopy, "No Image", (960, 290),
+                        cv2.FONT_HERSHEY_COMPLEX, 0.7, (0, 0, 255), 2)
     else:
-        # Nếu không có thông tin, có thể hiển thị mode mặc định
         modeType = 0
         imgBackgroundCopy[44:44 + 633, 808:808 + 414] = imgModeList[modeType]
 

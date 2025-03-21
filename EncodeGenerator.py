@@ -1,42 +1,38 @@
 import cv2
 import face_recognition
-import face_recognition_models
 import pickle
 import os
 
-# Importing people images
+# Đọc ảnh nền (có thể dùng cho giao diện, không ảnh hưởng đến mã hoá khuôn mặt)
 imgBackground = cv2.imread('Resources/background.png')
 folderPath = 'Images'
 pathList = os.listdir(folderPath)
-print (pathList)
+print("Danh sách ảnh:", pathList)
 imgList = []
 peopleIds = []
-for path in pathList:
-    imgList.append(cv2.imread(os.path.join(folderPath, path)))
-    peopleIds.append(os.path.splitext(path)[0])
-# print(len(imgList))
 
+for path in pathList:
+    img = cv2.imread(os.path.join(folderPath, path))
+    if img is not None:
+        imgList.append(img)
+        peopleIds.append(os.path.splitext(path)[0])
 
 def findEncodings(imagesList):
-    enCodeList = []
-    i = 0
-    for img in imagesList:
-        image = img
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        encode = face_recognition.face_encodings(img)
-        i += 1
-        print(i)
-        if len(encode) > 0:
+    encodeList = []
+    for i, img in enumerate(imagesList, start=1):
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        encodes = face_recognition.face_encodings(img_rgb)
+        print(f"Đang xử lý ảnh thứ {i}")
+        if encodes:
+            encodeList.append(encodes[0])
+    return encodeList
 
-            enCodeList.append(encode[0])
-
-    return enCodeList
-print("Encoding started ... ")
+print("Bắt đầu mã hoá khuôn mặt ...")
 encodeListKnown = findEncodings(imgList)
 encodeListWithIds = [encodeListKnown, peopleIds]
-print("Encoding complete")
+print("Mã hoá hoàn tất!")
 
-file = open("EncodeFile.p", 'wb')
-pickle.dump(encodeListWithIds, file)
-file.close()
-print("File saved")
+# Lưu file mã hoá vào thư mục Encodings
+with open("Encodings/EncodeFile.p", 'wb') as file:
+    pickle.dump(encodeListWithIds, file)
+print("File mã hoá đã được lưu tại Encodings/EncodeFile.p")
