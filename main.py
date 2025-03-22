@@ -35,6 +35,9 @@ while True:
         print("Không lấy được khung hình từ camera.")
         continue
 
+    #Lật ảnh
+    img = cv2.flip(img, 1)
+
     # Tiền xử lý ảnh: resize để tăng tốc xử lý
     imgS = cv2.resize(img, (0, 0), fx=0.25, fy=0.25)
     imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
