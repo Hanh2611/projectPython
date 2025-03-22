@@ -1,11 +1,15 @@
 import mysql.connector
 
-# Kết nối đến MySQL
+import configparser
+
+# Kết nối MySQL – sử dụng database được khởi tạo từ Data.sql
+config = configparser.ConfigParser()
+config.read("Resources/config.properties")
 conn = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="root",
-    database="FaceRecognition"
+    host=config.get("DEFAULT", "host"),
+    user=config.get("DEFAULT", "user"),
+    password=config.get("DEFAULT", "password"),
+    database=config.get("DEFAULT", "database")
 )
 cursor = conn.cursor()
 

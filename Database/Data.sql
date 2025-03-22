@@ -1,3 +1,4 @@
+show databases;
 -- Tạo database và sử dụng nó
 CREATE DATABASE IF NOT EXISTS FaceRecognition;
 USE FaceRecognition;

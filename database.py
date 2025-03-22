@@ -2,13 +2,16 @@ import mysql.connector
 import numpy as np
 import cv2
 from datetime import datetime
+import configparser
 
 # Kết nối MySQL – sử dụng database được khởi tạo từ Data.sql
+config = configparser.ConfigParser()
+config.read("Resources/config.properties")
 conn = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="root",
-    database="FaceRecognition"
+    host=config.get("DEFAULT", "host"),
+    user=config.get("DEFAULT", "user"),
+    password=config.get("DEFAULT", "password"),
+    database=config.get("DEFAULT", "database")
 )
 cursor = conn.cursor(dictionary=True)
 
