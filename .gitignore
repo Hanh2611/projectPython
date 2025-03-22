@@ -7,7 +7,7 @@
 
 # Theo dõi thư mục quan trọng
 !mypackage/
-!database/
+!Database/
 
 # Bỏ qua tệp biên dịch và cache Python
 __pycache__/
