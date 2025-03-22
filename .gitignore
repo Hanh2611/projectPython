@@ -20,6 +20,5 @@ venv/
 # Nhưng giữ lại thư mục Resources
 !Resources/
 
-
 # Bỏ qua file config.properties trong thư mục Resources
 Resources/config.properties
