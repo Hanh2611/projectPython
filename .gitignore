@@ -1,0 +1,24 @@
+# Bỏ qua tất cả mặc định
+*
+
+# Nhưng vẫn theo dõi mã nguồn Python
+!*.py
+!*.sql
+
+# Theo dõi thư mục quan trọng
+!mypackage/
+!database/
+
+# Bỏ qua tệp biên dịch và cache Python
+__pycache__/
+*.pyc
+
+# Bỏ qua thư mục môi trường ảo
+venv/
+.env/
+
+# Nhưng giữ lại thư mục Resources
+!Resources/
+
+# Bỏ qua file config.properties trong thư mục Resources
+Resources/config.properties
