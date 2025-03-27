@@ -4,21 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ee161afb-5f23-46bf-b1c4-f7a95a574eba" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BUS/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/BUS/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BUS/mainBUS.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/BUS/mainBUS.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DAO/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/DAO/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DAO/mainDAO.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/DAO/mainDAO.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Database/Data.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/Database/Data.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EncodeGenerator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/BUS/EncodeGenerator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GUI/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GUI/mainGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/mainGUI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RunDatabase.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/DAO/RunDatabase.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/DAO/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/insert_images.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/DAO/insert_images.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-    </list>
+    <list default="true" id="ee161afb-5f23-46bf-b1c4-f7a95a574eba" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -134,7 +120,7 @@
       <workItem from="1742820399228" duration="3807000" />
       <workItem from="1742989569793" duration="10385000" />
       <workItem from="1743064863164" duration="5241000" />
-      <workItem from="1743077574513" duration="8152000" />
+      <workItem from="1743077574513" duration="8454000" />
     </task>
     <servers />
   </component>
