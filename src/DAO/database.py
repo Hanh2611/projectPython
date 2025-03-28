@@ -4,15 +4,34 @@ import cv2
 from datetime import datetime
 import configparser
 
-# Kết nối MySQL – sử dụng database được khởi tạo từ Data.sql
+import os
+
 config = configparser.ConfigParser()
-config.read("Resources/config.properties")
+
+# Xác định đường dẫn tuyệt đối
+config_path = os.path.join(os.path.dirname(__file__), "..", "..", "Resources", "config.properties")
+config_path = os.path.abspath(config_path)
+
+if not os.path.exists(config_path):
+    raise FileNotFoundError(f"Không tìm thấy file cấu hình tại: {config_path}")
+
+config.read(config_path)
+
+
+# In ra các sections có trong file
+print("Sections:", config.sections())
+
+# Kiểm tra nếu 'host' không tồn tại
+if not config.has_option("DEFAULT", "host"):
+    raise KeyError("Không tìm thấy 'host' trong file cấu hình!")
+
 conn = mysql.connector.connect(
     host=config.get("DEFAULT", "host"),
     user=config.get("DEFAULT", "user"),
     password=config.get("DEFAULT", "password"),
-    database=config.get("DEFAULT", "database")
+    database=config.get("DEFAULT", "database"),
 )
+
 cursor = conn.cursor(dictionary=True)
 
 

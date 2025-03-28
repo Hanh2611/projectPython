@@ -137,7 +137,7 @@ def loginFrame():
 
     # Get absolute path to the background image
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    imgPath = os.path.join(base_dir, "..", "Resources", "photo", "background.jpg")
+    imgPath = os.path.join(base_dir, "..", "..", "Resources", "photo", "background.jpg")
 
     def on_resize(event):
         resizeImg(left, imgLabel, imgPath)

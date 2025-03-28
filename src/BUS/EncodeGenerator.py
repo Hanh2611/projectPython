@@ -4,7 +4,7 @@ import pickle
 import os
 
 # Đọc ảnh nền (có thể dùng cho giao diện, không ảnh hưởng đến mã hoá khuôn mặt)
-imgBackground = cv2.imread('Resources/background.png')
+imgBackground = cv2.imread('../../Resources/background.png')
 folderPath = 'Images'
 pathList = os.listdir(folderPath)
 print("Danh sách ảnh:", pathList)
@@ -33,6 +33,6 @@ encodeListWithIds = [encodeListKnown, peopleIds]
 print("Mã hoá hoàn tất!")
 
 # Lưu file mã hoá vào thư mục Encodings
-with open("Encodings/EncodeFile.p", 'wb') as file:
+with open("../../Encodings/EncodeFile.p", 'wb') as file:
     pickle.dump(encodeListWithIds, file)
 print("File mã hoá đã được lưu tại Encodings/EncodeFile.p")
