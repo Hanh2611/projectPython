@@ -20,3 +20,6 @@ dist/
 
 # Theo dõi thư mục quan trọng
 src/Database/
+
+# Bỏ qua file config.properties trong thư mục Resources
+Resources/config.properties
