@@ -1,5 +1,25 @@
-# created by virtualenv automatically
-.venv/bin
+# Môi trường ảo
+.env/
+.venv/
+env/
+ENV/
+
+# File biên dịch, bytecode, cache, pla pla
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Các file build, phân phối (chat gpt)
+build/
+dist/
+*.egg-info/
+
+# VS Code PyCharm
+.vscode/
+.idea/
+
+# Theo dõi thư mục quan trọng
+src/Database/
 
 # Bỏ qua file config.properties trong thư mục Resources
 Resources/config.properties
