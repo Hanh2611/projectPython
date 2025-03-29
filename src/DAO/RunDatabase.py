@@ -7,7 +7,7 @@ config.read("Resources/config.properties")
 
 try:
     conn = mysql.connector.connect(
-        host=config.get("DEFAULT", "host"),
+        host = config.get("DEFAULT", "host"),
         user=config.get("DEFAULT", "user"),
         password=config.get("DEFAULT", "password"),
         database=config.get("DEFAULT", "database")
